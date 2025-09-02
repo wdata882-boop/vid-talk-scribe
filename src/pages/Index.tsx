@@ -3,44 +3,69 @@ import VideoUpload from "@/components/VideoUpload";
 import ProcessingStatus from "@/components/ProcessingStatus";
 import SRTViewer from "@/components/SRTViewer";
 import { VideoFile, ProcessingState } from "@/types";
+import { transcriptionService } from "@/services/transcriptionService";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [uploadedVideo, setUploadedVideo] = useState<VideoFile | null>(null);
   const [processingState, setProcessingState] = useState<ProcessingState>("idle");
   const [srtContent, setSrtContent] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
 
-  const handleVideoUpload = (file: VideoFile) => {
+  const handleVideoUpload = async (file: VideoFile) => {
     setUploadedVideo(file);
-    setProcessingState("transcribing");
+    setIsProcessing(true);
     
-    // Simulate processing workflow
-    setTimeout(() => {
-      setProcessingState("translating");
-      setTimeout(() => {
-        setProcessingState("generating");
-        setTimeout(() => {
-          setProcessingState("completed");
-          // Mock SRT content
-          setSrtContent(`1
-00:00:00,000 --> 00:00:04,500
-Welcome to our video transcription service.
-
-2
-00:00:04,500 --> 00:00:08,000
-This tool automatically transcribes and translates your videos.
-
-3
-00:00:08,000 --> 00:00:12,500
-The accuracy is enhanced with word-level timestamps and speaker diarization.`);
-        }, 2000);
-      }, 3000);
-    }, 2000);
+    try {
+      console.log("Starting video processing for:", file.name);
+      
+      const srtResult = await transcriptionService.processVideo(
+        file.file,
+        (step: string, progress: number) => {
+          console.log(`Processing step: ${step}, progress: ${progress}%`);
+          
+          if (step === "transcribing") {
+            setProcessingState("transcribing");
+          } else if (step === "translating") {
+            setProcessingState("translating");
+          } else if (step === "generating") {
+            setProcessingState("generating");
+          } else if (step === "completed") {
+            setProcessingState("completed");
+          }
+        }
+      );
+      
+      setSrtContent(srtResult);
+      
+      toast({
+        title: "Processing Complete!",
+        description: "Your video has been successfully transcribed and translated to English."
+      });
+      
+    } catch (error) {
+      console.error("Video processing failed:", error);
+      
+      toast({
+        title: "Processing Failed",
+        description: error instanceof Error ? error.message : "An error occurred while processing your video.",
+        variant: "destructive"
+      });
+      
+      // Reset to upload state on error
+      setProcessingState("idle");
+      setUploadedVideo(null);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleReset = () => {
     setUploadedVideo(null);
     setProcessingState("idle");
     setSrtContent(null);
+    setIsProcessing(false);
   };
 
   return (

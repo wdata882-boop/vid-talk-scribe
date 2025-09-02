@@ -19,19 +19,19 @@ const ProcessingStatus = ({ state, fileName }: ProcessingStatusProps) => {
     {
       key: "transcribing",
       title: "Transcribing Audio",
-      description: "Converting speech to text with high accuracy",
+      description: "Using AI Whisper model to convert speech to text with precise timestamps",
       icon: FileText
     },
     {
       key: "translating", 
       title: "Translating to English",
-      description: "AI-powered translation with context awareness",
+      description: "Detecting language and translating Chinese/Myanmar/other languages to English",
       icon: Languages
     },
     {
       key: "generating",
       title: "Generating SRT File",
-      description: "Creating formatted subtitle file with timestamps",
+      description: "Creating properly formatted subtitle file with synchronized timestamps",
       icon: FileDown
     }
   ];
@@ -52,8 +52,11 @@ const ProcessingStatus = ({ state, fileName }: ProcessingStatusProps) => {
           <div className="w-20 h-20 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-glow">
             <Loader2 className="w-10 h-10 text-primary-foreground animate-spin" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">Processing Your Video</h2>
+          <h2 className="text-2xl font-bold mb-2">AI Processing Your Video</h2>
           <p className="text-muted-foreground">{fileName}</p>
+          <p className="text-sm text-primary mt-2">
+            Real-time transcription and translation in progress...
+          </p>
         </div>
 
         <div className="mb-8">
